@@ -1,0 +1,87 @@
+b. Methods:
+
+
+1.Taking only hypothetical proteins:
+
+
+>grep hypothetical GCF_000669635.1_Myco_tube_XDR_KZN_605_V1_protein.faa > ids_hypo_xdr_KZN605
+
+> less ids_hypo_xdr_KZN605
+
+
+
+2.Retrieving only the sequences of hypothetical proteins
+
+
+>cat ids_hypo_xdr_KZN605 | awk '{system ("/home/reaz/qurat/fastblast.pl -e " GCF_000669635.1_Myco_tube_XDR_KZN_605_V1_protein.faa$1 " > fastblast_hypoids_xdrkzn")}'
+
+
+
+3.Running Blastp of hypothetical proteins of xdr KZN assembly with nr database at 90%query coverage
+
+
+>makeblastdb -in nr -dbtype prot -out nr
+
+>blastp -query fastblast_hypoids_xdrkzn -db nr -out 90qcov_blastphypoids_xdrkzn-outfmt 7 -qcovs 90
+
+
+
+4.Taking only 1st top hits from the file 90qcov_blastphypoids_xdrkzn and save it as nr_top hits_90qcov_blastphypoids_xdrkzn.
+
+
+>grep -A1 "hits found" 90qcov_blastphypoids_xdrkzn | less
+
+>grep -A1 "hits found" 90qcov_blastphypoids_xdrkzn > tophits_90qcov_blastphypoids_xdrkzn
+
+
+5.Taking only ids from the file nr_tophits_90qcov_blastphypoids_xdrkzn.
+
+
+Only ids of hypothetical proteins file names “id”.
+
+less tophits_90qcov_blastphypoids_xdrkzn | awk '{print$1}' | uniq | less
+
+less tophits_90qcov_blastphypoids_xdrkzn | awk '{print$1}' | uniq | less > ids_nr_tophits_90qcov_blastphypoids_xdrkzn
+
+
+6. Grab their complete information from batch entrez.
+
+
+Submitted the file with Protein accession numbers “WP” into file 2425_batchentrez_protein_result.txt
+
+
+7. Ids having name in ncbi were taken from batch entrez output result, while if ids which
+
+are hypothetical in NCBI were not considered.
+
+
+cat nr_tophits_90qcov_blastphypoids_xdrkzn | grep “WP” | awk '{print$1}' 1stcoloumn_hypo_characterization_2
+
+
+8. To take only ids of those hypothetical proteins for which identified proteins were available in ncbi database.
+
+From the output file of batch entrez, taking those WP accession numbers of proteins against which functionally identified proteins were available.
+
+
+> 1stcoloumn_hypo_characterization_2
+
+
+9. Compiling sequence of all those step 8 proteins :
+
+> cat 1stcoloumn_hypo_characterization_2 | awk '{print ("/home/reaz/qurat/fastblast.pl -e " $1 " GCF_000669635.1_Myco_tube_XDR_KZN_605_V1_protein.faa >> fastblast.faa")}' | less
+
+> less fastblast.faa
+
+> cat 1stcoloumn_hypo_characterization_2 | awk '{system ("/home/reaz/qurat/fastblast.pl -e " $1 " GCF_000669635.1_Myco_tube_XDR_KZN_605_V1_protein.faa >> fastblast.faa")}'
+
+
+
+10. Run blastp against degg database:
+
+>makeblastdb -in degaa-p.dat -dbtype prot -out degaa-p.dat
+
+> blastp -query fastblast.faa -db degaa-p.dat -out degg_blast_hypo_character -outfmt 7 -evalue 0.001
+
+> blastp -query fastblast.faa -db degaa-p.dat -out degg_blast_hypo_character_0.001 -outfmt 7 -evalue 0.001
+
+> less degg_blast_hypo_character_0.001
